@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Cool animated fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Raleway:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            overflow-x: hidden;
+            background: linear-gradient(180deg, #1a237e 0%, #3949ab 30%, #5c6bc0 60%, #9575cd 100%);
+            position: relative;
+            min-height: 100vh;
+            color: #ffffff;
+        }
+
+        /* Three.js canvas for 3D mountains */
+        #threejs-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Parallax mountain layers */
+        .mountain-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-repeat: no-repeat;
+            background-position: center bottom;
+            background-size: cover;
+        }
+
+        .mountain-back {
+            z-index: 2;
+            opacity: 0.6;
+            animation: mountainFloat 20s ease-in-out infinite;
+            background: linear-gradient(transparent 0%, rgba(74, 20, 140, 0.3) 60%, rgba(74, 20, 140, 0.6) 100%);
+        }
+
+        .mountain-mid {
+            z-index: 3;
+            opacity: 0.8;
+            animation: mountainFloat 15s ease-in-out infinite reverse;
+            background: linear-gradient(transparent 0%, rgba(57, 73, 171, 0.4) 50%, rgba(57, 73, 171, 0.8) 100%);
+        }
+
+        .mountain-front {
+            z-index: 4;
+            animation: mountainFloat 10s ease-in-out infinite;
+            background: linear-gradient(transparent 0%, rgba(92, 107, 192, 0.3) 40%, rgba(92, 107, 192, 0.9) 100%);
+        }
+
+        @keyframes mountainFloat {
+            0%, 100% { transform: translateX(0px) translateY(0px); }
+            33% { transform: translateX(-20px) translateY(-10px); }
+            66% { transform: translateX(20px) translateY(10px); }
+        }
+
+        /* Animated clouds */
+        .clouds-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .cloud {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 40px;
+            animation: cloudDrift 25s linear infinite;
+        }
+
+        .cloud:nth-child(1) { top: 15%; animation-duration: 20s; animation-delay: -5s; }
+        .cloud:nth-child(2) { top: 25%; animation-duration: 30s; animation-delay: -15s; }
+        .cloud:nth-child(3) { top: 10%; animation-duration: 25s; animation-delay: -10s; }
+        .cloud:nth-child(4) { top: 30%; animation-duration: 35s; animation-delay: -20s; }
+
+        @keyframes cloudDrift {
+            from { transform: translateX(-200px); }
+            to { transform: translateX(calc(100vw + 200px)); }
+        }
+
+        /* Floating particles (stars/snow) */
+        .particles-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 6;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            animation: particleFloat 8s ease-in-out infinite;
+        }
+
+        @keyframes particleFloat {
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.3;
+            }
+            50% { 
+                transform: translateY(-100px) rotate(180deg);
+                opacity: 1;
+            }
+        }
+
+        /* Main content container */
+        .error-container {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .error-content {
+            text-align: center;
+            max-width: 800px;
+            padding: 60px 50px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            animation: contentEntrance 1.5s ease-out;
+            position: relative;
+        }
+
+        @keyframes contentEntrance {
+            from {
+                transform: translateY(100px) scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Mountain peak icon animation */
+        .mountain-icon {
+            font-size: 120px;
+            margin-bottom: 30px;
+            display: inline-block;
+            background: linear-gradient(45deg, #ffffff, #e8eaf6, #c5cae9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: mountainIconFloat 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.3));
+        }
+
+        @keyframes mountainIconFloat {
+            0%, 100% { 
+                transform: translateY(0px) scale(1);
+                filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.3));
+            }
+            50% { 
+                transform: translateY(-20px) scale(1.05);
+                filter: drop-shadow(0 0 40px rgba(255, 255, 255, 0.5));
+            }
+        }
+
+        /* Animated 404 text */
+        .error-number {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 140px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ffffff, #e3f2fd, #bbdefb, #90caf9);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite, numberPulse 2s ease-in-out infinite;
+            text-shadow: 0 0 50px rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes numberPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        /* Typography with cool effects */
+        .error-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: titleWave 3s ease-in-out infinite;
+            letter-spacing: -1px;
+        }
+
+        @keyframes titleWave {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .error-subtitle {
+            font-family: 'Raleway', sans-serif;
+            font-size: 22px;
+            font-weight: 400;
+            margin-bottom: 40px;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            animation: subtitleFade 2s ease-out 0.5s both;
+        }
+
+        @keyframes subtitleFade {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mountain-themed button */
+        .btn-home {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 18px 45px;
+            font-size: 18px;
+            font-weight: 600;
+            font-family: 'Raleway', sans-serif;
+            border-radius: 50px;
+            color: #ffffff;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            animation: buttonEntrance 2s ease-out 1s both;
+        }
+
+        @keyframes buttonEntrance {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-home::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.8s ease;
+        }
+
+        .btn-home:hover {
+            transform: translateY(-8px) scale(1.05);
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            color: #ffffff;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                0 0 30px rgba(255, 255, 255, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-home:hover::before {
+            left: 100%;
+        }
+
+        /* Animated compass decoration */
+        .compass-decoration {
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            font-size: 60px;
+            color: rgba(255, 255, 255, 0.1);
+            animation: compassRotate 20s linear infinite;
+        }
+
+        @keyframes compassRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .tree-decoration {
+            position: absolute;
+            bottom: -20px;
+            left: -20px;
+            font-size: 40px;
+            color: rgba(255, 255, 255, 0.15);
+            animation: treeSwway 4s ease-in-out infinite;
+        }
+
+        @keyframes treeSwway {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .error-number {
+                font-size: 100px;
+            }
+            
+            .error-title {
+                font-size: 36px;
+            }
+            
+            .error-subtitle {
+                font-size: 18px;
+            }
+            
+            .error-content {
+                margin: 20px;
+                padding: 50px 30px;
+            }
+            
+            .mountain-icon {
+                font-size: 90px;
+            }
+
+            .btn-home {
+                padding: 16px 35px;
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .error-number {
+                font-size: 80px;
+            }
+            
+            .error-title {
+                font-size: 28px;
+            }
+            
+            .error-subtitle {
+                font-size: 16px;
+            }
+            
+            .mountain-icon {
+                font-size: 70px;
+            }
+
+            .btn-home {
+                padding: 14px 30px;
+                font-size: 15px;
+            }
+
+            .error-content {
+                padding: 40px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Three.js 3D Mountains Canvas -->
+    <canvas id="threejs-canvas"></canvas>
+    
+    <!-- Parallax mountain layers -->
+    <div class="mountain-layer mountain-back"></div>
+    <div class="mountain-layer mountain-mid"></div>
+    <div class="mountain-layer mountain-front"></div>
+    
+    <!-- Animated clouds -->
+    <div class="clouds-container">
+        <i class="fas fa-cloud cloud"></i>
+        <i class="fas fa-cloud cloud"></i>
+        <i class="fas fa-cloud cloud"></i>
+        <i class="fas fa-cloud cloud"></i>
+    </div>
+    
+    <!-- Floating particles -->
+    <div class="particles-container" id="particles"></div>
+
+    <div class="error-container">
+        <div class="error-content">
+            <!-- Decorative elements -->
+            <div class="compass-decoration">
+                <i class="fas fa-compass"></i>
+            </div>
+            <div class="tree-decoration">
+                <i class="fas fa-tree"></i>
+            </div>
+            
+            <!-- Mountain peak icon -->
+            <div class="mountain-icon">
+                <i class="fas fa-mountain"></i>
+            </div>
+            
+            <!-- Animated 404 number -->
+            <div class="error-number">404</div>
+            
+            <!-- Mountain-themed content -->
+            <h1 class="error-title">Lost in the Mountains</h1>
+            <p class="error-subtitle">
+                Looks like you've wandered off the beaten path. The trail you're looking for 
+                doesn't exist in these peaks. Let's get you back to base camp safely.
+            </p>
+            
+            <!-- Mountain-themed home button -->
+            <a href="/" class="btn-home">
+                <i class="fas fa-home"></i>
+                Back to Base Camp
+            </a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Three.js 3D Mountain Scene
+        let scene, camera, renderer, mountains = [];
+        
+        function initThreeJS() {
+            const canvas = document.getElementById('threejs-canvas');
+            
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x1a237e, 100, 1000);
+            
+            // Camera setup
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera.position.set(0, 50, 200);
+            
+            // Renderer setup
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            
+            // Create 3D mountains
+            createMountains();
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x9575cd, 0.4);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(100, 200, 100);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+            
+            // Start animation
+            animate();
+        }
+        
+        function createMountains() {
+            // Create multiple mountain peaks with different geometries
+            for (let i = 0; i < 8; i++) {
+                const geometry = new THREE.ConeGeometry(
+                    Math.random() * 40 + 20,  // radius
+                    Math.random() * 100 + 60, // height
+                    8, // segments
+                    1  // height segments
+                );
+                
+                const material = new THREE.MeshLambertMaterial({
+                    color: new THREE.Color().setHSL(0.7 - i * 0.05, 0.6, 0.3 + i * 0.05),
+                    transparent: true,
+                    opacity: 0.8
+                });
+                
+                const mountain = new THREE.Mesh(geometry, material);
+                mountain.position.set(
+                    (Math.random() - 0.5) * 500,
+                    -50 + Math.random() * 20,
+                    -100 - Math.random() * 200
+                );
+                mountain.rotation.y = Math.random() * Math.PI;
+                mountain.castShadow = true;
+                mountain.receiveShadow = true;
+                
+                scene.add(mountain);
+                mountains.push({
+                    mesh: mountain,
+                    originalY: mountain.position.y,
+                    speed: Math.random() * 0.02 + 0.01
+                });
+            }
+        }
+        
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+            
+            // Animate mountains with floating motion
+            mountains.forEach((mountain, index) => {
+                mountain.mesh.position.y = mountain.originalY + Math.sin(time + index) * 10;
+                mountain.mesh.rotation.y += mountain.speed;
+            });
+            
+            // Camera gentle movement
+            camera.position.x = Math.sin(time * 0.1) * 20;
+            camera.position.y = 50 + Math.cos(time * 0.05) * 15;
+            camera.lookAt(0, 0, -100);
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Create floating particles (stars/snow)
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleIcons = ['fas fa-star', 'far fa-star', 'fas fa-snowflake'];
+            
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('i');
+                particle.className = particleIcons[Math.floor(Math.random() * particleIcons.length)] + ' particle';
+                
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                particle.style.fontSize = (Math.random() * 8 + 8) + 'px';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Advanced parallax effect
+        function addParallaxEffect() {
+            const mountainLayers = document.querySelectorAll('.mountain-layer');
+            
+            document.addEventListener('mousemove', function(e) {
+                const x = (e.clientX / window.innerWidth) - 0.5;
+                const y = (e.clientY / window.innerHeight) - 0.5;
+                
+                mountainLayers.forEach((layer, index) => {
+                    const speed = (index + 1) * 0.5;
+                    layer.style.transform = `
+                        translateX(${x * speed * 20}px) 
+                        translateY(${y * speed * 10}px)
+                    `;
+                });
+            });
+        }
+        
+        // Mountain peak icon special effects
+        function enhanceMountainIcon() {
+            const icon = document.querySelector('.mountain-icon');
+            
+            setInterval(() => {
+                if (Math.random() < 0.3) {
+                    icon.style.transform = `
+                        translateY(-20px) 
+                        scale(${1.05 + Math.random() * 0.1}) 
+                        rotate(${Math.random() * 4 - 2}deg)
+                    `;
+                    icon.style.filter = `
+                        drop-shadow(0 0 40px rgba(255, 255, 255, 0.6))
+                        hue-rotate(${Math.random() * 30}deg)
+                    `;
+                    
+                    setTimeout(() => {
+                        icon.style.transform = '';
+                        icon.style.filter = '';
+                    }, 300);
+                }
+            }, 2000);
+        }
+        
+        // Responsive Three.js
+        function handleResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // Weather effects
+        function addWeatherEffects() {
+            const clouds = document.querySelectorAll('.cloud');
+            
+            clouds.forEach(cloud => {
+                cloud.addEventListener('animationiteration', () => {
+                    // Randomly change cloud opacity and size
+                    cloud.style.opacity = Math.random() * 0.5 + 0.2;
+                    cloud.style.fontSize = (Math.random() * 20 + 30) + 'px';
+                });
+            });
+        }
+        
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            initThreeJS();
+            createParticles();
+            addParallaxEffect();
+            enhanceMountainIcon();
+            addWeatherEffects();
+            
+            window.addEventListener('resize', handleResize);
+            
+            // Smooth scroll behavior
+            document.documentElement.style.scrollBehavior = 'smooth';
+            
+            // Add entrance animation delay for better effect
+            const content = document.querySelector('.error-content');
+            content.style.animationDelay = '0.5s';
+        });
+        
+        // Performance optimization
+        window.addEventListener('load', function() {
+            const animatedElements = document.querySelectorAll('.error-number, .mountain-icon, .particle');
+            animatedElements.forEach(el => {
+                el.style.willChange = 'transform';
+            });
+        });
+    </script>
+</body>
+</html>
